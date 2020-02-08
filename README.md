@@ -1,5 +1,5 @@
 # SGP30 CO2 and VOC Sensing with A Raspberry Pi
- This Git describes code to capture and retransmit CO<sub>2</sub> and VOC (Volatile Organic Compounds) measurements from a [SGP30](https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/0_Datasheets/Gas/Sensirion_Gas_Sensors_SGP30_Datasheet.pdf) sensor on a Raspberry Pi to a remote dashboard in [ThingsBoard](https://thingsboard.io/) on a Raspberry Pi
+ This Git describes code to capture and retransmit CO<sub>2</sub> and VOC (Volatile Organic Compounds) measurements from a [SGP30](https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/0_Datasheets/Gas/Sensirion_Gas_Sensors_SGP30_Datasheet.pdf) sensor on a Raspberry Pi to a remote dashboard in [ThingsBoard](https://thingsboard.io/) on a Raspberry Pi. As a further capability, the 'Push Notification' service 'Prowl' was used to send a debug data stream to an Apple device.
 
  ## Project
  This project uses a Raspberry Pi to run an attached SGP30 sensor, able to record CO<sub>2</sub> and VOC levels, and for it to run unattended (no attached keyboard/mouse). Data then uploaded into a dashboard in [ThingsBoard](https://thingsboard.io/).
@@ -81,6 +81,11 @@ The sensor_data list was used to collect the CO<sub>2</sub> and VOC data before 
  Next a new dashboard was created, and an alias added to link to the new device. Then the dashboard was laid out with a number of Widgets to visualise the data.
 
  ![dashboard](https://github.com/rendzina/sgp30/blob/master/images/sgp30_dashboard.png "SGP30 ThingsBoard dashboard")
+
+ ## Prowl
+ [Prowl](https://www.prowlapp.com) is a push notification client for iOS, allowing push to your iPhone, iPod touch, or iPad notifications from another source. Here we used [Pyprowl](https://pypi.org/project/pyprowl/) to allow Prowl notifications from within Python. With Pyprowl installed, code was added in Python to enable sending the fully formatted sensor output as a notification.
+
+ ![dashboard](prowl_ios_notification.jpg "Prowl notification")
 
  ## Observations
  The Rasberry Pi code here uses the amazing SGP30 breakout board to capture a stream of CO<sub>2</sub> and VOC readings. These are passed to a ThingsBoard dashboard for display - IoT in action!.
