@@ -88,4 +88,4 @@ The sensor_data list was used to collect the CO<sub>2</sub> and VOC data before 
  ![Prowl](https://github.com/rendzina/sgp30/blob/master/images/prowl_ios_notification_thmb.jpg "Prowl notification")
 
  ## Observations
- The Rasberry Pi code here uses the amazing SGP30 breakout board to capture a stream of CO<sub>2</sub> and VOC readings. These are passed to a ThingsBoard dashboard for display - IoT in action!.
+ The Rasberry Pi code here uses the amazing SGP30 breakout board to capture a stream of CO<sub>2</sub> and VOC readings. These are passed to a ThingsBoard dashboard for display, and Prowl for push notification - IoT in action!.
