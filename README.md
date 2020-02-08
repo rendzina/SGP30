@@ -85,7 +85,7 @@ The sensor_data list was used to collect the CO<sub>2</sub> and VOC data before 
  ## Prowl
  [Prowl](https://www.prowlapp.com) is a push notification client for iOS, allowing push to your iPhone, iPod touch, or iPad notifications from another source. Here we used [Pyprowl](https://pypi.org/project/pyprowl/) to allow Prowl notifications from within Python. With Pyprowl installed, code was added in Python to enable sending the fully formatted sensor output as a notification.
 
- ![dashboard](prowl_ios_notification.jpg "Prowl notification")
+ ![Prowl](https://github.com/rendzina/sgp30/blob/master/images/prowl_ios_notification.jpg "Prowl notification")
 
  ## Observations
  The Rasberry Pi code here uses the amazing SGP30 breakout board to capture a stream of CO<sub>2</sub> and VOC readings. These are passed to a ThingsBoard dashboard for display - IoT in action!.
