@@ -1,28 +1,7 @@
 #!/usr/bin/python -u
 # co2_sgp30.py
-# s.hallett 7/2/20
 #
 # run as python sgp30.py
-#
-# To run on boot: Service file: /lib/systemd/system/co2.service
-# https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
-# [Unit]
-# Description=CO2  Service
-# After=multi-user.target
-# [Service]
-# Type=idle
-# ExecStart=/usr/bin/python /home/pi/sgp30-python/examples/co2_sgp30.py
-# WorkingDirectory=/home/pi/sgp30-python/examples
-# Restart=always
-# RestartSec=10
-# User=pi
-# [Install]
-# WantedBy=multi-user.target
-#
-# sudo systemctl enable co2.service
-# sudo systemctl start co2.service
-# sudo systemctl stop co2.service
-# systemctl is-active co2.service
 #
 from sgp30 import SGP30
 import os
@@ -41,13 +20,13 @@ class SGP30_Raw(SGP30):
 
 sgp30 = SGP30_Raw() # SPG30()
 
-THINGSBOARD_HOST = '51.104.217.125' # 'thingsboard.central.cranfield.ac.uk/' # 51.104.217.125
-ACCESS_TOKEN = 'sdYU2koQ46RmQ2clmIQv'
+THINGSBOARD_HOST = 'IP NUMBERS GO HERE' # Add here the Thingsboard server IP, eg. 123.456.789.101
+ACCESS_TOKEN = 'TOKEN GOES HERE' # Add here the THingsBoard device token, eg. abcDEF123ghiJKL456
 INTERVAL = 10
 
 # Prowl #### #######################################
 import prowlpy
-apikey = 'db7c80d9d3dfff164f9636b3e8f3d8907a6ec2e0'
+apikey = 'PROWL TOKEN GOES HERE' # Add Prowl token here, eg. aaaaabbbbbccccccddddddeeee
 p = prowlpy.Prowl(apikey)
 try:
     p.add('CO2','Starting up',"System commencing", 1, None, "http://www.prowlapp.com/")
@@ -92,8 +71,6 @@ try:
         client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
 
         # PROWL - Push notifications ######
-        #_message = "pm25: %.2f, pm10: %.2f, at %s" % (values[0], values[1], time.strftime("%d.%m.%Y %H:%M:%S"))
-        #print(_message)
         try:
             p.add('CO2','Reading', result, 1, None, "http://www.prowlapp.com/")
         except OSError as err:
@@ -103,7 +80,7 @@ try:
         ###################################
 
         if exit_thread.wait(timeout=INTERVAL):
-            break # https://realpython.com/intro-to-python-threading/
+            break # see https://realpython.com/intro-to-python-threading/
 except (KeyboardInterrupt, SystemExit):
     raise
 

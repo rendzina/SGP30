@@ -1,76 +1,78 @@
-# XmasTree
- Code to run different LED patterns using the fantastic [3D RGB Xmas Tree for Raspberry Pi](https://thepihut.com/products/3d-rgb-xmas-tree-for-raspberry-pi) on a Raspberry Pi
-
- ![alt text](https://github.com/rendzina/XmasTree/blob/master/images/Xmas_Tree.gif "Xmas Tree")
+# SGP30 CO2 and VOC Sensing with A Raspberry Pi
+ Code to capture and retransmit CO<sub>2</sub> and VOC (Volatile Organic Compounds) measurements from a [SGP30](https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/0_Datasheets/Gas/Sensirion_Gas_Sensors_SGP30_Datasheet.pdf) sensor on a Raspberry Pi to a remote dashboard in [ThingsBoard](https://thingsboard.io/) on a Raspberry Pi
 
  ## Project
- This project is to use a Raspberry Pi to run on an attached [3D RGB Xmas Tree for Raspberry Pi](https://thepihut.com/products/3d-rgb-xmas-tree-for-raspberry-pi), and for it to run unattended (no attached keyboard/mouse), changing the LED lights on the Xmas Tree on an attached headless Raspberry Pi.
+ This project is to use a Raspberry Pi to run an attached SGP30 sensor, able to record CO<sub>2</sub> and VOC levels, and for it to run unattended (no attached keyboard/mouse). Data then uploaded into a dashboard in [ThingsBoard](https://thingsboard.io/).
 
- The project uses a Raspberry Pi (we used a Pi Zero, although any model Pi would do), and based on the [Pi Hut example source code](https://github.com/ThePiHut/rgbxmastree#rgbxmastree).
-
- ## Software
- The script *`tree.py`* supplied by Pi Hut is used, and must be present in the same directory/folder as the Python scripts here. The reason is that the class 'RGBXmasTree' is imported from it:
-
+ The project uses a Raspberry Pi (we used a Pi 4, although any model Pi should do),
  ## Hardware
  The following hardware is used:
- - [Raspberry Pi Zero](https://www.raspberrypi.org/products/raspberry-pi-zero-w/)
+ - [Raspberry Pi 4](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/)
+ - [SGP30 Air Quality Sensor Breakout](https://shop.pimoroni.com/products/sgp30-air-quality-sensor-breakout)
 
-This hardware is well designed - having removed the tree parts carefully from the circuit board and without twisting them (clippers will do this, we used a small dremmel fine circular saw). The parts then all just push fit together - no soldering is required.
+ The first step is to solder a pin connector to the Pi Moroni breakout board. The sensor pinout of the Pi Moroni breakout device unfortunately is not directly pin compatible with the GPIO bus pinout of the Pi. The solution however is just to use four connecting wires between the sensor and the Pi and join the two appropriately. Note by contrast the SGP30 Breakout from [Adafruit](https://www.adafruit.com/product/3709) does appear to be pin compatible.
+
+ ## Software
+ Pi Moroni provide an excellent [Python library](https://github.com/pimoroni/sgp30-python) to run a SGP30. This was installed on the Pi
+
+ Pi Moroni provide two methods to install the software, we found the method working the best was:
+```
+git clone https://github.com/pimoroni/sgp30-python
+cd sgp30-python
+sudo ./install.sh
+```
+On installing we encountered the error: *ImportError: cannot import name ‘SGP30’ from ‘sgp30’*. It seems we are not alone and others have also [experienced this error](https://forums.pimoroni.com/t/importerror-cannot-import-name-sgp30-from-sgp30/12261). We had to completely uninstall the library (pip and pip3), then reinstall as above (a few times) before it worked.
+```
+pip uninstall SGP30
+pip3 uninstall SGP30
+```
 
  ## Code
- A variety of code samples are given:
- - *[XmasTree_Colours.py](./XmasTree_Colours.py)* Set all LEDs to same but random colours cycling through using a list of colours, setting the top LED to white
- - *[XmasTree_Sparkle.py](./XmasTree_Sparkle.py)* Set random LEDs to random colours, setting the top LED to white *(this was the preferred Xmas code!)*
- - *[XmasTree_Swirl.py](./XmasTree_Swirl.py)* run through three separate patterns - spiral, layers, rotate
- - *[XmasTree_WhichLEDIsWhich.py](./XmasTree_WhichLEDIsWhich.py)* Helps identify which LED is which number - to aid development of patterns. Running this code produces a grid window with 25 buttons - click each number to light up the corresponding LED.
+ The code ['Temperature upload over MQTT using Raspberry Pi and DHT22 sensor'](https://thingsboard.io/docs/samples/raspberry/temperature/) was used as a starting point.
 
- Colours in XmasTree_Colours.py can be added to the list, with the colour names as described at (https://www.rapidtables.com/web/color/RGB_Color.html#color-table).
+ The code was adapted to work with the Pi Moroni SGP30 library, see the file 'co2_sgp30.py'. A number of adaptations were made:
 
- Colours in the XmasTree_Sparkle.py are generated randomly and can use either the HSV model, or the RGB model (comment out one of these).
+ 1. The PiMoroni SGP30 library uses Python class 'SGP30'. When this is instanced in the code, the function sgp30.get_air_quality() is called to output readings. These are formatted and so are suitable for printing out - but they do not offer access to the raw data. We therefore created an inherited class and added a new function to return the raw data, thus:
+ ```
+ class SGP30_Raw(SGP30):
+   def get_air_quality_raw(self):
+         eco2, tvoc = self.command('measure_air_quality')
+         return (eco2, tvoc)
+```
+The sensor_data list was used to collect the CO<sub>2</sub> and VOC data before it was sent to THingsBoard in JSON form.
 
- There are 25 APA102 RGB LEDs on the board, numbered 0-24, one of these is the LED on the top of the tree. Experimentation with XmasTree_WhichLEDIsWhich.py revealed this to be LED number 3. A variable was set up to represent this to allow it to be coloured separately (set as number 3 in code to refer to the list element holding the number 21).
+2. The code to run the 'endless loop', taking a reading every so many seconds ('INTERVAL') originally used time.sleep(). We did not like this, as time.sleep() can be CPU intensive, so an alternative 'threading' loop was used, based on the great examples [here](https://realpython.com/intro-to-python-threading/).
+
+ ### Running at Start-Up
+ To run the code at startup, a service was created, 'co2.service'. Copying this file to the home folder on the pi, the service was placed in /lib/systemd/system/.
+ ```
+ sudo cp co2.service /lib/systemd/system
+ ```
+ The service can then be started, stopped and automated:
+ ```
+ sudo systemctl start co2.service
+ sudo systemctl stop co2.service
+ sudo systemctl enable co2.service
+ systemctl status co2.service
+ ```
 
  ## Instructions
- The Xmas Tree is fitted to the Raspberry Pi, via the GPIO bus. The orientation of the GPIO plug is critical and MUST be fitted correctly or else voltage will be applied to the data line due to the PCB design (not a good idea!)
-
- The Pi was set up to run in 'headless' mode (no monitor/keyboard/mouse) - to do this see our [GeoThread blog](http://www.geothread.net/?s=headless), allowing a remote laptop to ssh in to the Pi, and using [FileZilla](https://filezilla-project.org) to copy files over to it.
-
- ## Testing
- To test the Xmas Tree board, in the same folder as the script *`tree.py`* supplied by Pi Hut, run the Python shell:
+ The code can be run initially as:
  ```
- Python 3.7.3
- >>> from tree import RGBXmasTree
- >>> tree = RGBXmasTree()
- >>> tree[3].color = (0, 1, 0)
- >>> tree.off()
- ```
- Respectively, this sets up the tree, turns on the top LED (3) green, then turns all the LEDs off.
-
- Next, to test the code, it was run remotely via ssh from a laptop running the python script, the code was located in the home folder *'/home/pi'*, e.g.:
- ```
- > python3 XmasTree_Sparkle.py
+ cd /sgp30-python/examples
+ python sgp30.py
  ```
 
- ## Operation
-  To make the code run unattended on the Pi, there needed to be a means to start the programme automatically on boot. The best means to do this was found to be to use an autostart desktop file. A file was therefore created thus:
- ```
- > touch /home/pi/.config/autostart/XmasTree.desktop
- > nano /home/pi/.config/autostart/XmasTree.desktop
+ Once the code was known to work correctly, the Pi could be rebooted, and the service 'co2', described above, started to run automatically.
 
- [Desktop Entry]
- Type=Application
- Name=3D Xmas Tree
- Exec=/usr/bin/python3 /home/pi/XmasTree_Sparkle.py
- ```
+ ## ThingsBoard
+ [ThingsBoard](https://thingsboard.io/) offers *'Device management, data collection, processing and visualization for your IoT solution'*. We were working with our own installation of ThingsBoard.
+
+ In ThingsBoard, we added a new 'SGP30' device and obtained its access token. This was copied to the ACCESS_TOKEN field in the Python code.
+
+ Next a new dashboard was created, and an alias added to link to the new device. Then the dashboard was laid out with a number of Widgets to visualise the data.
+
+ ![dashboard](https://github.com/rendzina/sgp30/blob/master/images/sgp30_dashboard.png "SGP30")
 
  ## Observations
- The code here gives some interesting display options, adding to the existing example code. There is huge scope now for further improvements to have different displays. One interesting development would be to link the display to various sensors and events that the Pi can handle - so a PIR detector used to display lights according to proximity of people for example.
-
- A final note is that the Pi has no graceful way to be shut down when done. Simply turning off the Pi at the mains is not a great idea. One solution is to use a crontab entry to simply close the Pi down at say 23:30 each day (of course it needs to be turned on each day).
-```
-sudo crontab -e
-[add a root user crontab]
-
- 30 23 * * * /sbin/shutdown -h now
-```
-Now the Pi can be rebooted.
+ The Rasberry Pi code here uses the amazing SGP30 breakout board to capture a stream of CO<sub>2</sub> and VOC readings. These are passed to A ThingsBoard dashboard for display.
