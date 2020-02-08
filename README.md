@@ -72,7 +72,7 @@ The sensor_data list was used to collect the CO<sub>2</sub> and VOC data before 
 
  Next a new dashboard was created, and an alias added to link to the new device. Then the dashboard was laid out with a number of Widgets to visualise the data.
 
- ![dashboard](https://github.com/rendzina/sgp30/blob/master/images/sgp30_dashboard.png "SGP30")
+ ![dashboard](https://github.com/rendzina/sgp30/blob/master/images/sgp30_dashboard.png "SGP30 ThingsBoard dashboard")
 
  ## Observations
  The Rasberry Pi code here uses the amazing SGP30 breakout board to capture a stream of CO<sub>2</sub> and VOC readings. These are passed to A ThingsBoard dashboard for display.
