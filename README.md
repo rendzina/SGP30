@@ -20,7 +20,16 @@
 
  - [SGP30 Air Quality Sensor Breakout](https://shop.pimoroni.com/products/sgp30-air-quality-sensor-breakout)
 
- The first step was to solder a pin connector to the Pi Moroni breakout board. The sensor pinout of the Pi Moroni breakout device unfortunately is not directly pin compatible with the GPIO bus pinout of the Pi. The solution however is just to use four connecting wires between the sensor and the Pi and join the two up appropriately. Note that by contrast, the SGP30 Breakout board from [Adafruit](https://www.adafruit.com/product/3709) does appear to be pin compatible.
+ The first step was to solder a pin connector to the Pi Moroni breakout board. The sensor pinout of the Pi Moroni breakout device unfortunately is not directly pin compatible with the GPIO bus pinout of the Pi. The solution however is just to use four connecting wires between the sensor and the Pi's [GPIO bus](https://www.raspberrypi.org/documentation/usage/gpio/) and join the two up appropriately. Note that by contrast, the SGP30 Breakout board from [Adafruit](https://www.adafruit.com/product/3709) does appear to be pin compatible. The four connections needed are:
+ ```
+ SGP Breakout         Raspberry Pi
+ Connection           GPIO pin Connection
+ 2.6v   ------------  3v3 power (pin 1)
+ SDA    ------------  GPIO2 SDA (pin 2)
+ SCL    ------------  GPIO2 SCL (pin 3)
+ 0
+ GND    ------------  Ground (pin 9)
+ ```
 
  ## Software
  Pi Moroni provide an excellent [Python library](https://github.com/pimoroni/sgp30-python) to run a SGP30. This was installed on the Pi
