@@ -30,6 +30,7 @@
  0
  GND    ------------  Ground (pin 9)
  ```
+ ![Raspberry Pi and SGP30 sensor wiring](https://github.com/rendzina/sgp30/blob/master/images/SGP30_Wiring_thmb.jpeg "Raspberry Pi and SGP30 sensor wiring")
 
  ## Software
  Pi Moroni provide an excellent [Python library](https://github.com/pimoroni/sgp30-python) to run a SGP30. This was installed on the Pi
